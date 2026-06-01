@@ -4,6 +4,9 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
 COPY ["/CatalogAPI-master/CatalogAPI/CatalogAPI.csproj", "CatalogAPI/"]
+COPY ["/CatalogAPI-master/Application/Application.csproj", "Application/"]
+COPY ["/CatalogAPI-master/Domain/Domain.csproj", "Domain/"]
+COPY ["/CatalogAPI-master/Infrastructure/Infrastructure.csproj", "Infrastructure/"]
 
 RUN dotnet restore "CatalogAPI/CatalogAPI.csproj"
 
