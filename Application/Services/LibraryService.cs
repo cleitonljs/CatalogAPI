@@ -17,7 +17,7 @@ namespace Application.Services
         public async Task OrderPaymentProcessed(PaymentProcessedEvent message)
         {
 
-            var email = $"Pagamento Recebido\nGameId:{message.GameId}\nUserId:{message.UserId}\nSatus:{message.Status}";
+            var email = $"CatalogAPI: Pagamento {message.Status}";
 
             Console.WriteLine(email);
 
@@ -32,6 +32,8 @@ namespace Application.Services
                 var createLibrary = await unitOfWork.Library.AdicionarAsync(library);
 
                 await unitOfWork.SaveChangesAsync();
+
+                Console.WriteLine("Biblioteca criada com sucesso.");
             }
         }
 
@@ -49,7 +51,7 @@ namespace Application.Services
 
             Console.WriteLine("Criar Biblioteca e gerar evento");
 
-            await orderPlacedProducer.OrderPlacedSend(evento);
+            await orderPlacedProducer.OrderPlacedPublish(evento);
 
 
         }

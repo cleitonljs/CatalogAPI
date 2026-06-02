@@ -9,6 +9,6 @@ namespace Application.Interfaces
 {
     public interface IOrderPlacedProducer
     {
-        Task OrderPlacedSend(OrderPlacedEvent evento);
+        Task OrderPlacedPublish(OrderPlacedEvent evento);
     }
 }

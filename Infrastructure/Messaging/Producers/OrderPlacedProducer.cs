@@ -12,7 +12,7 @@ namespace Infrastructure.Messaging.Producers
 {
     public class OrderPlacedProducer(ISendEndpointProvider sendEndpointProvider, IConfiguration cfg) : IOrderPlacedProducer
     {
-        public async Task OrderPlacedSend(OrderPlacedEvent evento)
+        public async Task OrderPlacedPublish(OrderPlacedEvent evento)
         {
             Console.WriteLine($"Enviando evento para a fila:{cfg["RabbitMQ:Queues:FCG_Catalog"]}");
 
@@ -20,6 +20,8 @@ namespace Infrastructure.Messaging.Producers
                     new Uri($"queue:{cfg["RabbitMQ:Queues:FCG_Catalog"]}"));
 
             await endpoint.Send(evento);
+
+            Console.WriteLine("Evento de pedido de compra enviado.");
         }
 
     }

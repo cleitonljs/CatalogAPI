@@ -15,7 +15,7 @@ namespace Infrastructure.Messaging.Consumer
         {
             var message = context.Message;
 
-            var email = $"Compra Recebida\nGameId:{message.GameId}\nUserId:{message.UserId}\nStatus:{message.Status}";
+            var email = $"CatalogAPI: Pagamento recebido";
 
             Console.WriteLine(email);
 
