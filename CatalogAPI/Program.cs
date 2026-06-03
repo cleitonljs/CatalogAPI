@@ -91,11 +91,15 @@ builder.Services.AddMassTransit(x =>
             });
 
         cfg.ReceiveEndpoint(
-                builder.Configuration["RabbitMQ:Queues:FCG_Payment"],
+                builder.Configuration["RabbitMQ:Queues:FCG_Catalog"],
                 e =>
                 {
                     e.ConfigureConsumer<PaymentProcessedConsumer>(
                         context);
+
+                    e.UseMessageRetry(r => r.Interval(5, TimeSpan.FromSeconds(10)));
+
+                    e.UseInMemoryOutbox();
                 });
 
     });
@@ -160,7 +164,5 @@ using (var scope = app.Services.CreateScope())
 
     db.Database.Migrate();
 }
-
-Console.WriteLine($"FCG_Payment: {builder.Configuration["RabbitMQ:Queues:FCG_Payment"]}");
 
 app.Run();

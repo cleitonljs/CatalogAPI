@@ -14,14 +14,10 @@ namespace Infrastructure.Messaging.Producers
     {
         public async Task OrderPlacedPublish(OrderPlacedEvent evento)
         {
-            Console.WriteLine($"Enviando evento para a fila:{cfg["RabbitMQ:Queues:FCG_Catalog"]}");
-
             var endpoint = await sendEndpointProvider.GetSendEndpoint(
-                    new Uri($"queue:{cfg["RabbitMQ:Queues:FCG_Catalog"]}"));
+                    new Uri($"queue:{cfg["RabbitMQ:Queues:FCG_Payment"]}"));            
 
-            await endpoint.Send(evento);
-
-            Console.WriteLine("Evento de pedido de compra enviado.");
+                await endpoint.Send(evento);            
         }
 
     }

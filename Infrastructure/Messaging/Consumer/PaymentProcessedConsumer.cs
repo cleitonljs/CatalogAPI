@@ -15,10 +15,6 @@ namespace Infrastructure.Messaging.Consumer
         {
             var message = context.Message;
 
-            var email = $"CatalogAPI: Pagamento recebido";
-
-            Console.WriteLine(email);
-
             //Gravar order se aprovada
             await librarySevice.OrderPaymentProcessed(message);
         }

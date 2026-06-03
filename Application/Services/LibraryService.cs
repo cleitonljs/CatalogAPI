@@ -17,10 +17,6 @@ namespace Application.Services
         public async Task OrderPaymentProcessed(PaymentProcessedEvent message)
         {
 
-            var email = $"CatalogAPI: Pagamento {message.Status}";
-
-            Console.WriteLine(email);
-
             if (message.Status == "Approved")
             {
                 var library =  new Library
@@ -32,8 +28,6 @@ namespace Application.Services
                 var createLibrary = await unitOfWork.Library.AdicionarAsync(library);
 
                 await unitOfWork.SaveChangesAsync();
-
-                Console.WriteLine("Biblioteca criada com sucesso.");
             }
         }
 
@@ -48,8 +42,6 @@ namespace Application.Services
                 GameId = library.IDGame,
                 Price = game.Price
             };
-
-            Console.WriteLine("Criar Biblioteca e gerar evento");
 
             await orderPlacedProducer.OrderPlacedPublish(evento);
 
