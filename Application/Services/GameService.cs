@@ -28,6 +28,9 @@ namespace Application.Services
         {
             var Game = await unitOfWork.Games.ObterPorIdAsync(GameUpdateRequest.Id) ?? throw new DirectoryNotFoundException(GameUpdateRequest.Id.ToString());
 
+            Game.Nome = GameUpdateRequest.Nome;
+            Game.Price = GameUpdateRequest.Price;
+
             await unitOfWork.Games.Atualizar(Game);
             await unitOfWork.SaveChangesAsync();
         }        
