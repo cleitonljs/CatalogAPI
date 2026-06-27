@@ -12,8 +12,11 @@ namespace CatalogAPI.Controllers
         [HttpPost("game/criar")]
         public async Task<IActionResult> Create([FromBody] GameRequest GameRequest)
         {
+            if (GameRequest.Price < 0)
+                return BadRequest("O preço do jogo não pode ser negativo.");
+
             try
-            {   
+            {
                 var game = await gameService.CriarGameAsync(GameRequest);
                 return Created("", game);
             }
@@ -23,7 +26,7 @@ namespace CatalogAPI.Controllers
             }
         }
 
-        [Authorize(Roles = "Administrador")]
+        [Authorize]
         [HttpGet("game/todos")]
         public async Task<IActionResult> GetAll()
         {
@@ -38,7 +41,7 @@ namespace CatalogAPI.Controllers
             }
         }
 
-        [Authorize(Roles = "Administrador")]
+        [Authorize]
         [HttpGet("game/{id}")]
         public async Task<IActionResult> Get(int id)
         {

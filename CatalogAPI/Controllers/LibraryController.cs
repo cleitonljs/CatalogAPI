@@ -3,6 +3,7 @@ using Application.Interfaces;
 using Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CatalogAPI.Controllers
 {
@@ -12,6 +13,11 @@ namespace CatalogAPI.Controllers
         [HttpPost("criar")]
         public async Task<IActionResult> Create([FromBody] LibraryRequest LibraryRequest)
         {
+            var loggedUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (loggedUserId == null || !int.TryParse(loggedUserId, out var parsedId) || parsedId != LibraryRequest.IDUsuario)
+                return Forbid();
+
             try
             {
                 await LibrarySevice.CriarLibraryAsync(LibraryRequest);
