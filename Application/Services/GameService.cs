@@ -1,4 +1,4 @@
-﻿using Application.DTOs;
+using Application.DTOs;
 using Application.Interfaces;
 using AutoMapper;
 using Domain.Entities;
@@ -11,8 +11,11 @@ using System.Threading.Tasks;
 
 namespace Application.Services
 {
-    public class GameService(IUnitOfWork unitOfWork, IMapper mapper) : IGameService 
+    public class GameService(IUnitOfWork unitOfWork, IMapper mapper, ICacheService cacheService) : IGameService
     {
+        private const string ChaveListaTodos = "catalog:games:todos";
+        private static string ChaveJogo(int id) => $"catalog:game:{id}";
+
         public async Task<Game> CriarGameAsync(GameRequest User)
         {
             var Game = mapper.Map<Game>(User);
@@ -20,6 +23,8 @@ namespace Application.Services
             var createdGame = await unitOfWork.Games.AdicionarAsync(Game);
 
             await unitOfWork.SaveChangesAsync();
+
+            await cacheService.RemoverAsync(ChaveListaTodos);
 
             return createdGame;
         }
@@ -33,7 +38,10 @@ namespace Application.Services
 
             await unitOfWork.Games.Atualizar(Game);
             await unitOfWork.SaveChangesAsync();
-        }        
+
+            await cacheService.RemoverAsync(ChaveListaTodos);
+            await cacheService.RemoverAsync(ChaveJogo(GameUpdateRequest.Id));
+        }
 
         public async Task DeletarAsync(int id)
         {
@@ -42,16 +50,39 @@ namespace Application.Services
             await unitOfWork.Games.DeletarAsync(User);
 
             await unitOfWork.SaveChangesAsync();
+
+            await cacheService.RemoverAsync(ChaveListaTodos);
+            await cacheService.RemoverAsync(ChaveJogo(id));
         }
 
         public async Task<Game> ObterPorIdAsync(int id)
         {
-            return await unitOfWork.Games.ObterPorIdAsync(id);
+            var chave = ChaveJogo(id);
+
+            var emCache = await cacheService.ObterAsync<Game>(chave);
+            if (emCache != null)
+                return emCache;
+
+            var game = await unitOfWork.Games.ObterPorIdAsync(id);
+
+            if (game != null)
+                await cacheService.DefinirAsync(chave, game, TimeSpan.FromSeconds(60));
+
+            return game;
         }
 
         public async Task<IEnumerable<Game>> ObterTodosAsync()
         {
-            return await unitOfWork.Games.ObterTodosAsync();
+            var emCache = await cacheService.ObterAsync<List<Game>>(ChaveListaTodos);
+            if (emCache != null)
+                return emCache;
+
+            var jogos = await unitOfWork.Games.ObterTodosAsync();
+            var lista = jogos.ToList();
+
+            await cacheService.DefinirAsync(ChaveListaTodos, lista, TimeSpan.FromSeconds(60));
+
+            return lista;
         }
     }
 }
