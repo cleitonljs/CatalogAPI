@@ -3,10 +3,12 @@ using Application.Services;
 using Domain.Common.Settings;
 using Domain.Interfaces;
 using Infrastructure;
+using Infrastructure.Cache;
 using Infrastructure.Context;
 using Infrastructure.Messaging.Consumer;
 using Infrastructure.Messaging.Producers;
 using Infrastructure.Observability;
+using Infrastructure.Nosql;
 using Infrastructure.Repositories;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -35,12 +37,12 @@ builder.Services.AddSwaggerGen(options => {
 
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = @"Autenticação JWT usando Bearer Token. 
-                      
-            Para usar, copie o token recebido no login e cole no campo abaixo. 
+        Description = @"Autenticação JWT usando Bearer Token.
+
+            Para usar, copie o token recebido no login e cole no campo abaixo.
             O sistema adicionará automaticamente 'Bearer' no início do token.
 
-            Exemplo: se seu token é 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...', 
+            Exemplo: se seu token é 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
             cole apenas 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' (sem aspas, sem 'Bearer').",
         Name = "Authorization",
         In = ParameterLocation.Header,
@@ -97,6 +99,27 @@ builder.Services.AddOpenTelemetry()
                 Boundaries = [0.001, 0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10]
             })
         .AddPrometheusExporter());
+
+// =========================================
+// MongoDB (item 4, Fase 3 — persistência poliglota: avaliações de jogos)
+// =========================================
+builder.Services.Configure<MongoSettings>(
+    builder.Configuration.GetSection(MongoSettings.SectionName));
+
+builder.Services.AddSingleton<MongoDbContext>();
+builder.Services.AddScoped<IGameReviewRepository, GameReviewRepository>();
+builder.Services.AddScoped<IGameReviewService, GameReviewService>();
+
+// =========================================
+// Redis (item 4, Fase 3 — cache distribuído)
+// =========================================
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "catalog-api:";
+});
+
+builder.Services.AddScoped<ICacheService, RedisCacheService>();
 
 builder.Services.AddMassTransit(x =>
 {
