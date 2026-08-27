@@ -1,5 +1,6 @@
 ﻿using Domain.Interfaces;
 using Infrastructure.Context;
+using Infrastructure.Observability;
 using Infrastructure.Repositories;
 using System;
 using System.Collections.Generic;
@@ -24,9 +25,8 @@ namespace Infrastructure
             Library = new LibraryRepository(_dbContext);
 
         }
-        public async Task<int> SaveChangesAsync()
-        {
-            return await _dbContext.SaveChangesAsync();
-        }
+        public Task<int> SaveChangesAsync() =>
+            DatabaseMetrics.TrackAsync(nameof(UnitOfWork) + "." + nameof(SaveChangesAsync), "*", () =>
+                _dbContext.SaveChangesAsync());
     }
 }
